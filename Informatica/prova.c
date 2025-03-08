@@ -1,13 +1,20 @@
 #include <stdio.h>
 
-void cambia(int *x) {
-    *x = *x + 10;
+int somma(int n) {
+    if (n == 0)
+        return 0;
+    return n + somma(n - 1);
 }
 
 int main() {
-    int numero = 5;
-    cambia(&numero);
-    printf("Numero: %d\n", numero);
+    printf("%d\n", somma(3));
     return 0;
 }
+
+
+
+
+
+
+
 
