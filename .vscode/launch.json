@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/workspaces/LisoSventraPapere/Programmazione C++",
-      "program": "/workspaces/LisoSventraPapere/Programmazione C++/build/Debug/outDebug",
+      "cwd": "/workspaces/LisoSventraPapere",
+      "program": "/workspaces/LisoSventraPapere/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
