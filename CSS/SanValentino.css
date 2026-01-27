@@ -1,0 +1,118 @@
+:root {
+    --letter-love: 300px;
+    --letter: #1a1a1a; /* Sfondo scuro come nel video */
+    --pink-bg: #ff4d94;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: rgba(5, 3, 22, 0.856);
+    background-size: 50px 50px;
+    background-position: 0 0, 25px 25px;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.main-card {
+    color: white;
+    z-index: 1;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+/* --- CLASSE DAL VIDEO --- */
+.San_Valentin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transform-origin: center center;
+    opacity: 0;
+    will-change: transform, opacity;
+    width: 90%;
+    max-width: 400px;
+    height: var(--letter-love);
+    background: var(--letter);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+    border: 2px solid #ff4d94;
+}
+
+.San_Valentin.active {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    animation: pop 450ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+    0% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.te-amo {
+    font-family: "Brush Script MT", cursive; /* Simula il font "Te Amo" del video */
+    font-size: 3rem;
+    color: #ff4d94;
+    margin: 0;
+}
+
+.bouquet {
+    font-size: 5rem;
+    margin-top: 10px;
+}
+
+#messaggio {
+    font-size: 1.2rem;
+    margin: 15px 20px 0 20px;
+    color: #ffffff;
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.San_Valentin.active.hidden {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Decorazioni semplici */
+.flower {
+    font-size: 2rem;
+    position: absolute;
+    bottom: -50px;
+}
+.left { left: 20%; }
+.right { right: 20%; }

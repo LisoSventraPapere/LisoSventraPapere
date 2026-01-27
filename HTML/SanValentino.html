@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>exUSE me dovevo fartelo</title>
+    <link rel="stylesheet" href="SanValentino.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="main-card">
+            <h1 class="title">FELICE SAN VALENTINO TATA 🧡😝</h1>
+            <p>Una cosa speciale per te</p>
+            <button id="btn-sorpresa" aria-controls="sorpresa" aria-expanded="false">Apri il regalo ;P</button>
+        </div>
+
+        <div id="sorpresa" class="San_Valentin hidden" aria-hidden="true">
+            <h2 class="te-amo" tabindex="-1">Ti voglio bene</h2>
+            <p id="messaggio">Sei la persona più speciale per me. <br>Buon San Valentino mimi</p>
+            <div class="bouquet">🌹</div>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('btn-sorpresa');
+        const sorpresa = document.getElementById('sorpresa');
+
+        function toggleSorpresa() {
+            if(!sorpresa || !btn) return;
+            const willOpen = !sorpresa.classList.contains('active');
+            if(willOpen) {
+                sorpresa.classList.add('active');
+                sorpresa.classList.remove('hidden');
+            } else {
+                sorpresa.classList.remove('active');
+                sorpresa.classList.add('hidden');
+            }
+            btn.innerText = willOpen ? 'Chiudi' : 'Vedi sorpresa';
+            btn.setAttribute('aria-expanded', String(willOpen));
+            sorpresa.setAttribute('aria-hidden', String(!willOpen));
+            if(willOpen) {
+                const target = sorpresa.querySelector('.te-amo');
+                if(target) target.focus();
+            } else {
+                btn.focus();
+            }
+        }
+
+        if(btn) {
+            btn.addEventListener('click', toggleSorpresa);
+            btn.addEventListener('keydown', (e) => {
+                if(e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggleSorpresa();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
