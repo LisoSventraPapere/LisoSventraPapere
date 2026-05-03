@@ -2,18 +2,23 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: gcc compila il file attivo",
+            "label": "C/C++: gcc compila progetto completo",
             "command": "/usr/bin/gcc",
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "-I\"nightres/1) includes\"",
+                "\"nightres/2) src/main.c\"",
+                "\"nightres/2) src/tavoli.c\"",
+                "\"nightres/2) src/clienti.c\"",
+                "\"nightres/2) src/prenotazioni.c\"",
+                "\"nightres/2) src/file_io.c\"",
+                "\"nightres/2) src/utils.c\"",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
-                ""
+                "${workspaceFolder}/nightres.exe"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$gcc"
@@ -22,7 +27,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Attività generata dal debugger."
+            "detail": "Compila tutti i file .c del progetto"
         }
     ],
     "version": "2.0.0"
