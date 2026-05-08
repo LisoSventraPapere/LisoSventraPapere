@@ -133,40 +133,48 @@ void visualizza_storico_prenotazioni(Cliente *clienti, int num_clienti,
         printf("Errore: impossibile aprire storico.csv\n");
         return;
     }
-    char riga[256];
-    // Salta header
-    if (fgets(riga, sizeof(riga), file) == NULL) {
+
+    /* Salta header */
+    char header[256];
+    if (fgets(header, sizeof(header), file) == NULL) {
         fclose(file);
         return;
     }
-    while (fgets(riga, sizeof(riga), file) != NULL) {
-        int id_pren = atoi(estrai_campo_csv(riga, 0, ','));
-        int id_cliente_pren = atoi(estrai_campo_csv(riga, 1, ','));
-        if (id_cliente_pren == id_cliente) {
-            int id_tavolo = atoi(estrai_campo_csv(riga, 2, ','));
-            int numero_persone = atoi(estrai_campo_csv(riga, 4, ','));
-            char data_ora[20];
-            formatta_orario(stringa_a_time(estrai_campo_csv(riga, 3, ',')), data_ora, sizeof(data_ora));
-            char fascia[16];
-            switch (atoi(estrai_campo_csv(riga, 5, ','))) {
-                case 0: strcpy(fascia, "Apertura"); break;
-                case 1: strcpy(fascia, "Prime ore"); break;
-                case 2: strcpy(fascia, "Late night"); break;
-                default: strcpy(fascia, "Sconosciuta"); break;
-            }
-            char stato[16];
-            strncpy(stato, estrai_campo_csv(riga, 6, ','), sizeof(stato) - 1);
-            stato[sizeof(stato) - 1] = '\0';
-            float penale = atof(estrai_campo_csv(riga, 7, ','));
-            printf("%-5d | %-10d | %-10d | %-20s | %-10s | %-10s | €%-10.2f\n",
-                   id_pren,
-                   id_tavolo,
-                   numero_persone,
-                   data_ora,
-                   fascia,
-                   stato,
-                   penale);
+
+    Storico s;
+        long data_long = 0;
+        /*
+         * Formato file: id_prenotazione,id_cliente,numero_tavolo,data_ora,num_persone,fascia_oraria,stato,penale
+         * data_ora è salvato come stringa numerica di time_t (vedi salva_storico_csv)
+         */
+    while(1) {
+        if(scanf(file, "%d,%d,%d,%ld,%d,%d,%31[^,],%f",&s.id_prenotazione,
+                            &s.id_cliente, &s.id_tavolo, &data_long, &s.numero_persone, &s.fascia, s.stato, &s.penale) != 8) {
+            printf("Errore: formato storico.csv non valido\n");
+            fclose(file);
+            return;
         }
+        s.data_ora = (time_t)data_long;
+
+        if (s.id_cliente != id_cliente) {
+            printf("Errore: nessuna prenotazione trovata per questo cliente.\n");
+            return;
+        }
+
+        char data_ora_buf[32];
+        formatta_orario(s.data_ora, data_ora_buf, sizeof(data_ora_buf));
+
+        char fascia_str[16];
+        switch (s.fascia) {
+            case 0: strcpy(fascia_str, "Apertura"); break;
+            case 1: strcpy(fascia_str, "Prime ore"); break;
+            case 2: strcpy(fascia_str, "Late night"); break;
+            default: strcpy(fascia_str, "Sconosciuta"); break;
+        }
+
+        /* Stato è già una stringa (es: CANCELLATA, NO_SHOW) */
+        printf("%-5d | %-10d | %-10d | %-20s | %-10s | %-10s | €%-10.2f\n",
+            s.id_prenotazione, s.id_tavolo, s.numero_persone, data_ora_buf, fascia_str, s.stato, s.penale);
     }
     fclose(file);
 }
@@ -176,14 +184,30 @@ void visualizza_clienti(Cliente *clienti, int num_clienti) {
     printf("%-5s | %-15s | %-15s | %-12s | %-12s\n",
            "ID", "Nome", "Cognome", "Fedeltà", "Penale Totale");
     printf("-----------------------------------------------------------------\n");
-    
-    for (int i = 0; i < num_clienti; i++) {
-        printf("%-5d | %-15s | %-15s | %-12s | €%-10.2f\n",
-               clienti[i].id,
-               clienti[i].nome,
-               clienti[i].cognome,
-               clienti[i].livello_fedelta,
-               clienti[i].penale_totale);
+    FILE *file = fopen(CLIENTI_CSV, "r");
+    if (file == NULL) {
+        printf("Errore: impossibile aprire %s\n", CLIENTI_CSV);
+        return;
     }
+    /* Salta header */
+    char header[256];
+    if (fgets(header, sizeof(header), file) == NULL) {
+        fclose(file);
+        return;
+    }
+    Cliente c;
+    while (1) {
+        int scanned = fscanf(file, "%d,%49[^,],%49[^,],%19[^,],%f",
+                             &c.id, c.nome, c.cognome, c.livello_fedelta, &c.penale_totale);
+        if (scanned == EOF) break;
+        if (scanned != 5) {
+            printf("Errore: formato clienti.csv non valido\n");
+            fclose(file);
+            return;
+        }
+        printf("%-5d | %-15s | %-15s | %-12s | €%-10.2f\n",
+               c.id, c.nome, c.cognome, c.livello_fedelta, c.penale_totale);
+    }
+    fclose(file);
 }
 

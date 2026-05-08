@@ -32,10 +32,7 @@ void salva_tavoli_csv(Tavolo *tavoli, int num_tavoli, const char *filename) {
     fprintf(file, "numero,capienza,prezzo_minimo,zona\n");
     for (int i = 0; i < num_tavoli; i++) {
         fprintf(file, "%d,%d,%.2f,%s\n",
-                tavoli[i].numero,
-                tavoli[i].capienza,
-                tavoli[i].prezzo_minimo,
-                tavoli[i].zona);
+                tavoli[i].numero, tavoli[i].capienza, tavoli[i].prezzo_minimo, tavoli[i].zona);
     }
     
     fclose(file);
@@ -53,11 +50,7 @@ void salva_clienti_csv(Cliente *clienti, int num_clienti, const char *filename) 
     
     for (int i = 0; i < num_clienti; i++) {
         fprintf(file, "%d,%s,%s,%s,%.2f\n",
-                clienti[i].id,
-                clienti[i].nome,
-                clienti[i].cognome,
-                clienti[i].livello_fedelta,
-                clienti[i].penale_totale);
+                clienti[i].id, clienti[i].nome, clienti[i].cognome, clienti[i].livello_fedelta, clienti[i].penale_totale);
     }
     
     fclose(file);
@@ -76,22 +69,10 @@ void salva_prenotazioni_csv(Prenotazione *prenotazioni, int num_prenotazioni,
     fprintf(file, "id_prenotazione,id_cliente,id_tavolo,data_ora,num_persone,fascia_oraria\n");
     
     for (int i = 0; i < num_prenotazioni; i++) {
-        if (prenotazioni[i].stato != ATTIVA) {
-            continue;
-        }
-        if (prenotazioni[i].cliente == NULL || prenotazioni[i].tavolo == NULL) {
-            printf("Errore: Prenotazione %d ha puntatori nulli, saltata\n", prenotazioni[i].id);
-            continue;
-        }
         char buffer[32];
         time_a_stringa(prenotazioni[i].data_ora, buffer, sizeof(buffer));
         fprintf(file, "%d,%d,%d,%s,%d,%d\n",
-                prenotazioni[i].id,
-                prenotazioni[i].id_cliente,
-                prenotazioni[i].id_tavolo,
-                buffer,
-                prenotazioni[i].numero_persone,
-                prenotazioni[i].fascia);
+                prenotazioni[i].id, prenotazioni[i].id_cliente, prenotazioni[i].id_tavolo, buffer, prenotazioni[i].numero_persone, prenotazioni[i].fascia);
     }
     
     fclose(file);
@@ -119,49 +100,12 @@ void salva_storico_csv(Prenotazione *prenotazioni, int num_prenotazioni,
                 strcpy(stato_str, "NO_SHOW");
             }
             fprintf(file, "%d,%d,%d,%s,%d,%d,%s,%.2f\n",
-                    prenotazioni[i].id,
-                    prenotazioni[i].id_cliente,
-                    prenotazioni[i].id_tavolo,
-                    buffer_data_ora,
-                    prenotazioni[i].numero_persone,
-                    prenotazioni[i].fascia,
-                    stato_str,
-                    prenotazioni[i].penale_applicata);
+                    prenotazioni[i].id, prenotazioni[i].id_cliente, prenotazioni[i].id_tavolo, buffer_data_ora, prenotazioni[i].numero_persone, prenotazioni[i].fascia, stato_str, prenotazioni[i].penale_applicata);
         }
     }
     
     fclose(file);
     printf("✓ Storico salvato su %s\n", filename);
-}
-
-// CARICAMENTO CSV - PARSING MANUALE
-
-char* estrai_campo_csv(char *riga, int numero_campo, char delimiter) {
-    static char campo[256];
-    int campo_attuale = 0;
-    int indice_campo = 0;
-    
-    for (int i = 0; riga[i] != '\0' && riga[i] != '\n'; i++) {
-        if (riga[i] == delimiter) {
-            if (campo_attuale == numero_campo) {
-                campo[indice_campo] = '\0';
-                return campo;
-            }
-            campo_attuale++;
-            indice_campo = 0;
-        } else {
-            if (campo_attuale == numero_campo && indice_campo < 255) {
-                campo[indice_campo++] = riga[i];
-            }
-        }
-    }
-    
-    if (campo_attuale == numero_campo) {
-        campo[indice_campo] = '\0';
-        return campo;
-    }
-    
-    return "";
 }
 
 time_t stringa_a_time(const char *stringa) {
@@ -202,11 +146,17 @@ int carica_tavoli_csv(Tavolo **tavoli, int *capacita_tavoli, const char *filenam
         return 0;
     }
 
-    // Parsing riga per riga
-    while (fgets(riga, sizeof(riga), file) != NULL) {
-        if (riga_vuota(riga)) {
-            continue;
+    // Parsing riga per riga con fscanf
+    while (1) {
+        int numero, capienza;
+        float prezzo;
+        char zona[20];
+        if(fscanf(file, "%d,%d,%f,%19[\n\r\t ],%*c", &numero, &capienza, &prezzo, zona) != 5) {
+            printf("Errore: formato %s non valido\n", filename);
+            fclose(file);
+            return 0;
         }
+
         if (num_tavoli >= *capacita_tavoli) {
             *capacita_tavoli *= 2;
             *tavoli = realloc(*tavoli, *capacita_tavoli * sizeof(Tavolo));
@@ -216,10 +166,12 @@ int carica_tavoli_csv(Tavolo **tavoli, int *capacita_tavoli, const char *filenam
                 return num_tavoli;
             }
         }
-        (*tavoli)[num_tavoli].numero = atoi(estrai_campo_csv(riga, 0, ','));
-        (*tavoli)[num_tavoli].capienza = atoi(estrai_campo_csv(riga, 1, ','));
-        (*tavoli)[num_tavoli].prezzo_minimo = atof(estrai_campo_csv(riga, 2, ','));
-        strcpy((*tavoli)[num_tavoli].zona, estrai_campo_csv(riga, 3, ','));
+
+        (*tavoli)[num_tavoli].numero = numero;
+        (*tavoli)[num_tavoli].capienza = capienza;
+        (*tavoli)[num_tavoli].prezzo_minimo = prezzo;
+        strncpy((*tavoli)[num_tavoli].zona, zona, sizeof((*tavoli)[num_tavoli].zona) - 1);
+        (*tavoli)[num_tavoli].zona[sizeof((*tavoli)[num_tavoli].zona) - 1] = '\0';
         num_tavoli++;
     }
 
@@ -257,10 +209,19 @@ int carica_clienti_csv(Cliente **clienti, int *capacita_clienti, const char *fil
         return 0;
     }
 
-    while (fgets(riga, sizeof(riga), file) != NULL) {
-        if (riga_vuota(riga)) {
-            continue;
+    while (1) {
+        int id;
+        char nome[50];
+        char cognome[50];
+        char livello[20];
+        float penale;
+        if(fscanf(file, "%d,%49[^,],%49[^,],%19[^,],%f",
+                             &id, nome, cognome, livello, &penale) != 5) {
+            printf("Errore: formato clienti.csv non valido\n");
+            fclose(file);
+            return 0;
         }
+
         if (num_clienti >= *capacita_clienti) {
             *capacita_clienti *= 2;
             *clienti = realloc(*clienti, *capacita_clienti * sizeof(Cliente));
@@ -270,11 +231,15 @@ int carica_clienti_csv(Cliente **clienti, int *capacita_clienti, const char *fil
                 return num_clienti;
             }
         }
-        (*clienti)[num_clienti].id = atoi(estrai_campo_csv(riga, 0, ','));
-        strcpy((*clienti)[num_clienti].nome, estrai_campo_csv(riga, 1, ','));
-        strcpy((*clienti)[num_clienti].cognome, estrai_campo_csv(riga, 2, ','));
-        strcpy((*clienti)[num_clienti].livello_fedelta, estrai_campo_csv(riga, 3, ','));
-        (*clienti)[num_clienti].penale_totale = atof(estrai_campo_csv(riga, 4, ','));
+
+        (*clienti)[num_clienti].id = id;
+        strncpy((*clienti)[num_clienti].nome, nome, sizeof((*clienti)[num_clienti].nome) - 1);
+        (*clienti)[num_clienti].nome[sizeof((*clienti)[num_clienti].nome) - 1] = '\0';
+        strncpy((*clienti)[num_clienti].cognome, cognome, sizeof((*clienti)[num_clienti].cognome) - 1);
+        (*clienti)[num_clienti].cognome[sizeof((*clienti)[num_clienti].cognome) - 1] = '\0';
+        strncpy((*clienti)[num_clienti].livello_fedelta, livello, sizeof((*clienti)[num_clienti].livello_fedelta) - 1);
+        (*clienti)[num_clienti].livello_fedelta[sizeof((*clienti)[num_clienti].livello_fedelta) - 1] = '\0';
+        (*clienti)[num_clienti].penale_totale = penale;
         (*clienti)[num_clienti].prenotazioni = NULL;
         num_clienti++;
     }
@@ -312,10 +277,16 @@ int carica_prenotazioni_csv(Prenotazione **prenotazioni, int *capacita_prenotazi
         return 0;
     }
 
-    while (fgets(riga, sizeof(riga), file) != NULL) {
-        if (riga_vuota(riga)) {
-            continue;
+    while (1) {
+        int id, id_cliente, id_tavolo, numero_persone, fascia;
+        long data_long;
+        if(fscanf(file, "%d,%d,%d,%ld,%d,%d",
+                             &id, &id_cliente, &id_tavolo, &data_long, &numero_persone, &fascia) != 6) {
+            printf("Errore: formato prenotazioni.csv non valido\n");
+            fclose(file);
+            return 0;
         }
+
         if (num_prenotazioni >= *capacita_prenotazioni) {
             *capacita_prenotazioni *= 2;
             *prenotazioni = realloc(*prenotazioni, *capacita_prenotazioni * sizeof(Prenotazione));
@@ -325,12 +296,13 @@ int carica_prenotazioni_csv(Prenotazione **prenotazioni, int *capacita_prenotazi
                 return num_prenotazioni;
             }
         }
-        (*prenotazioni)[num_prenotazioni].id = atoi(estrai_campo_csv(riga, 0, ','));
-        (*prenotazioni)[num_prenotazioni].id_cliente = atoi(estrai_campo_csv(riga, 1, ','));
-        (*prenotazioni)[num_prenotazioni].id_tavolo = atoi(estrai_campo_csv(riga, 2, ','));
-        (*prenotazioni)[num_prenotazioni].data_ora = stringa_a_time(estrai_campo_csv(riga, 3, ','));
-        (*prenotazioni)[num_prenotazioni].numero_persone = atoi(estrai_campo_csv(riga, 4, ','));
-        (*prenotazioni)[num_prenotazioni].fascia = atoi(estrai_campo_csv(riga, 5, ','));
+
+        (*prenotazioni)[num_prenotazioni].id = id;
+        (*prenotazioni)[num_prenotazioni].id_cliente = id_cliente;
+        (*prenotazioni)[num_prenotazioni].id_tavolo = id_tavolo;
+        (*prenotazioni)[num_prenotazioni].data_ora = (time_t)data_long;
+        (*prenotazioni)[num_prenotazioni].numero_persone = numero_persone;
+        (*prenotazioni)[num_prenotazioni].fascia = fascia;
         (*prenotazioni)[num_prenotazioni].stato = ATTIVA;
         (*prenotazioni)[num_prenotazioni].ora_scadenza_no_show =
             calcola_scadenza_no_show((*prenotazioni)[num_prenotazioni].data_ora);
@@ -360,16 +332,28 @@ int carica_storico_csv(Prenotazione *prenotazioni, int *num_prenotazioni,
     
     char riga[256];
     int num_letti = 0;
-    
+
     if (fgets(riga, sizeof(riga), file) == NULL) {
         fclose(file);
         return 0;
     }
-    
-    while (fgets(riga, sizeof(riga), file) != NULL) {
-        if (riga_vuota(riga)) {
-            continue;
+
+    /* Leggi righe con fscanf per contare/parsing */
+    while (1) {
+        int id_pren, id_cliente, id_tavolo, num_pers, fascia;
+        long data_long;
+        char stato[32];
+        float penale;
+        if(fscanf(file, "%d,%d,%d,%ld,%d,%d,%31[^,],%f",
+                             &id_pren, &id_cliente, &id_tavolo, &data_long,
+                             &num_pers, &fascia, stato, &penale) != 8) {
+            printf("Errore: formato storico.csv non valido\n");
+            fclose(file);
+            return 0;
         }
+
+        (void)id_pren; (void)id_cliente; (void)id_tavolo; (void)data_long;
+        (void)num_pers; (void)fascia; (void)stato; (void)penale;
         num_letti++;
     }
     

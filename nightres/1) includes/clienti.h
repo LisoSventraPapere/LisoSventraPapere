@@ -12,6 +12,8 @@
 
 #define CLIENTI_CSV "nightres/3) data/clienti.csv"
 
+#include <time.h>
+
 typedef struct Prenotazione Prenotazione;  // Forward declaration
 
 typedef struct {
@@ -22,6 +24,18 @@ typedef struct {
     float penale_totale;      // Totale penali accumulate
     Prenotazione *prenotazioni; // Testa della lista collegata delle prenotazioni
 } Cliente;
+
+/* Struttura per le righe dello storico (file storico.csv) */
+typedef struct {
+    int id_prenotazione;
+    int id_cliente;
+    int id_tavolo;
+    time_t data_ora;         /* salvato su file come stringa numerica */
+    int numero_persone;
+    int fascia;              /* memorizza valore numerico della fascia */
+    char stato[32];
+    float penale;
+} Storico;
 
 /* CRUD */
 

@@ -1,2 +1,1 @@
 id_prenotazione,id_cliente,numero_tavolo,data_ora,num_persone,fascia_oraria,stato,penale
-1,1,1,1778184000,2,0,CANCELLATA,0.00

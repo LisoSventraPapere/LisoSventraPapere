@@ -60,13 +60,6 @@ int carica_storico_csv(Prenotazione *prenotazioni, int *num_prenotazioni,
                        Cliente *clienti, int num_clienti,
                        const char *filename);
 
-/* FUNZIONI AUSILIARIE PARSING */
-
-/**
- * Tokenizza riga CSV e estrae campi (usa strtok)
- */
-char* estrai_campo_csv(char *riga, int numero_campo, char delimiter);
-
 /**
  * Converte stringa time a time_t
  */
