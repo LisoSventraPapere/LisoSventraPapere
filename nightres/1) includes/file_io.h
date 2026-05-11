@@ -53,14 +53,6 @@ int carica_clienti_csv(Cliente **clienti, int *capacita_clienti, const char *fil
 int carica_prenotazioni_csv(Prenotazione **prenotazioni, int *capacita_prenotazioni, const char *filename);
 
 /**
- * Carica storico da CSV
- * @return numero record caricati
- */
-int carica_storico_csv(Prenotazione *prenotazioni, int *num_prenotazioni,
-                       Cliente *clienti, int num_clienti,
-                       const char *filename);
-
-/**
  * Converte stringa time a time_t
  */
 time_t stringa_a_time(const char *stringa);
